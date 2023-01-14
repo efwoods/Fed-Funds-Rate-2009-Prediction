@@ -25,3 +25,8 @@ data_rmna.head()
 import seaborn as sns
 
 sns.lineplot(x='Date',y='Federal Funds Target Rate',data=data_rmna)
+
+import plotly.express as px
+
+fig = px.line(data_rmna, x="Date", y="Federal Funds Target Rate", title='Federal Funds Target Rate Trend')
+fig.show()
