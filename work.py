@@ -18,7 +18,7 @@ from numpy import nan as NA
 data_rm_lit = data.iloc[:,:4]
 data_rmna = data_rm_lit.dropna()
 
-data_rmna['Date'] = data_rmna['Year'].map(str)+"/"+data_rmna['Month'].map(str)+"/"+data_rmna['Day'].map(str)
+data_rmna['Date'] = data_rmna['Year'].map(str)+"-"+data_rmna['Month'].map(str)+"-"+data_rmna['Day'].map(str)
 
 data_rmna.head()
 
