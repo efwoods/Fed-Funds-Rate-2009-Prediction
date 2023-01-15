@@ -53,7 +53,7 @@ final_data =  pd.pivot_table(testdf,index=["time"])
 train_data = final_data.loc[training_start_date:training_end_date]
 test_data = final_data.loc[testing_start_date:]
 
-model = mSSA(rank=1)
+model = mSSA()
 model.update_model(train_data)
 
 # Creating Predictions with the model
@@ -71,30 +71,42 @@ legend_prediction = ['Federal Funds Target Rate Prediction', 'Federal Funds Uppe
 ### Plotting
 plt.figure(figsize = (16, 6))
 
-# Federal Funds Target Rate
-FederalFundsTargetRatePred = plt.plot(predFederalFundsTargetRate['Mean Predictions'], label = 'FederalFundsTargetRate predictions')
+## Actual Values
 
-plt.fill_between(predFederalFundsTargetRate.index, predFederalFundsTargetRate['Lower Bound'], predFederalFundsTargetRate['Upper Bound'], alpha = 0.1)
+FederalFundsTargetRateActual = plt.plot(final_data['Federal Funds Target Rate'].loc[plot_start_date:plot_end_date], 'r', label = 'FederalFundsTargetRate Actual', alpha = 1.0)
 
-FederalFundsTargetRateActual = plt.plot(final_data['Federal Funds Target Rate'].loc[plot_start_date:plot_end_date], label = 'FederalFundsTargetRate Actual', alpha = 1.0)
+EffectiveFederalFundsRateActual = plt.plot(final_data['Effective Federal Funds Rate'].loc[plot_start_date:plot_end_date],'g', label = 'Effective Federal Funds Rate Actual', alpha = 1.0)
 
-# Unemployment Rate
-UnemploymentRatePrediction = plt.plot(predUnemploymentRate['Mean Predictions'], label = 'UnemploymentRate predictions')
+RealGDPPercentChangeActual = plt.plot(final_data['Real GDP (Percent Change)'].loc[plot_start_date:plot_end_date],'b', label = 'Real GDP (Percent Change) Actual', alpha = 1.0)
 
-plt.fill_between(predUnemploymentRate.index, predUnemploymentRate['Lower Bound'], predUnemploymentRate['Upper Bound'], alpha = 0.1)
+UnemploymentRateActual = plt.plot(final_data['Unemployment Rate'].loc[plot_start_date:plot_end_date],'y', label = 'Unemployment Rate Actual', alpha = 1.0)
 
-UnemploymentRateActual = plt.plot(final_data['Unemployment Rate'].loc[plot_start_date:plot_end_date], label = 'UnemploymentRate Actual', alpha = 1.0)
-
-
+InflationRateActual = plt.plot(final_data['Inflation Rate'].loc[plot_start_date:plot_end_date],'orange', label = 'Inflation Rate Actual', alpha = 1.0)
 
 # Set the title of the plot 
 plt.title('Forecasting Federal Funds Target Rate 1 month ahead')
 
 # Set legend
-plt.axis([FederalFundsTargetRatePred,FederalFundsTargetRateActual, UnemploymentRatePrediction, UnemploymentRateActual], label='Inline label')
-plt.legend()
+# plt.axis([FederalFundsTargetRatePred,FederalFundsTargetRateActual, UnemploymentRatePrediction, UnemploymentRateActual], label='Inline label')
+plt.legend(loc="lower right")
 
 plt.show()
+
+'''
+
+## Predictions
+
+# Federal Funds Target Rate
+FederalFundsTargetRatePred = plt.plot(predFederalFundsTargetRate['Mean Predictions'], 'g--', label = 'Federal FundsTarget Rate predictions')
+
+plt.fill_between(predFederalFundsTargetRate.index, predFederalFundsTargetRate['Lower Bound'], predFederalFundsTargetRate['Upper Bound'], alpha = 0.1)
+
+
+# Unemployment Rate
+UnemploymentRatePrediction = plt.plot(predUnemploymentRate['Mean Predictions'],'r--', label = 'UnemploymentRate predictions')
+
+plt.fill_between(predUnemploymentRate.index, predUnemploymentRate['Lower Bound'], predUnemploymentRate['Upper Bound'], alpha = 0.1)
+'''
 
 '''
 ### Forecast Monthly data
