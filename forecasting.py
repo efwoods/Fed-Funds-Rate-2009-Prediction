@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
-
 ##### Federal Funds Target Rate
 
 ### format data
@@ -21,8 +20,6 @@ data = data.ffill()
 
 # data_rm_lit = data.iloc[:,:4]
 # data_rmna = data_rm_lit.dropna()
-
-
 
 ymd = pd.DataFrame({'Year': data['Year'],'Month': data['Month'],'Day':data['Day']})
 time = pd.to_datetime(ymd)
@@ -47,7 +44,7 @@ plot_start_date = '2007-09-01'
 plot_end_date = '2009-12-31'
 
 
-pred_window_size = 2
+pred_window_size = 48
 
 incident = time.loc[time =='2007-09-01'].index
 pred_start_date = str(time[incident])
@@ -124,7 +121,6 @@ plt.legend(loc="lower right")
 
 plt.show()
 
-
 ### Aggregating Data
 ## Restructuring the predictions
 # Federal Funds Target Rate
@@ -170,7 +166,7 @@ model = mSSA()
 model.update_model(final_pred_data)
 
 pred_start_date = pred_end_date
-pred_window_size +=2
+pred_window_size +=24
 pred_end_date = str(time.loc[incident+pred_window_size])
 pred_end_date = pred_end_date[6:16]
 
@@ -237,7 +233,7 @@ final_pred_data.drop_duplicates()
 model.update_model(final_pred_data)
 
 pred_start_date = pred_end_date
-pred_window_size +=2
+pred_window_size *=2
 pred_end_date = str(time.loc[incident+pred_window_size])
 pred_end_date = pred_end_date[6:16]
 
@@ -272,27 +268,27 @@ InflationRateActual = plt.plot(final_data['Inflation Rate'].loc[plot_start_date:
 
 
 # Federal Funds Target Rate
-FederalFundsTargetRatePred = plt.plot(predFederalFundsTargetRate['Mean Predictions'], 'r:', label = 'Predicted Federal FundsTarget Rate')
+FederalFundsTargetRatePred = plt.plot(predFederalFundsTargetRate['Mean Predictions'].loc[plot_start_date:plot_end_date], 'r:', label = 'Predicted Federal FundsTarget Rate')
 
 plt.fill_between(predFederalFundsTargetRate.index, predFederalFundsTargetRate['Lower Bound'], predFederalFundsTargetRate['Upper Bound'], alpha = 0.1)
 
 # Effective Federal Funds Rate
-EffectiveFederalFundsRatePrediction = plt.plot(predEffectiveFederalFundsRate['Mean Predictions'],'g:', label = 'Predicted Effective Federal Funds Rate')
+EffectiveFederalFundsRatePrediction = plt.plot(predEffectiveFederalFundsRate['Mean Predictions'].loc[plot_start_date:plot_end_date],'g:', label = 'Predicted Effective Federal Funds Rate')
 
 plt.fill_between(predEffectiveFederalFundsRate.index, predEffectiveFederalFundsRate['Lower Bound'], predEffectiveFederalFundsRate['Upper Bound'], alpha = 0.1)
 
 # Real GDP (Percent Change)
-RealGDPPercentChangePrediction = plt.plot(predRealGDPPercentChange['Mean Predictions'],'b:', label = 'Predicted Real GDP (Percent Change)')
+RealGDPPercentChangePrediction = plt.plot(predRealGDPPercentChange['Mean Predictions'].loc[plot_start_date:plot_end_date],'b:', label = 'Predicted Real GDP (Percent Change)')
 
 plt.fill_between(predRealGDPPercentChange.index, predRealGDPPercentChange['Lower Bound'], predRealGDPPercentChange['Upper Bound'], alpha = 0.1)
 
 # Unemployment Rate
-UnemploymentRatePrediction = plt.plot(predUnemploymentRate['Mean Predictions'],'c:', label = 'Predicted Unemployment Rate')
+UnemploymentRatePrediction = plt.plot(predUnemploymentRate['Mean Predictions'].loc[plot_start_date:plot_end_date],'c:', label = 'Predicted Unemployment Rate')
 
 plt.fill_between(predUnemploymentRate.index, predUnemploymentRate['Lower Bound'], predUnemploymentRate['Upper Bound'], alpha = 0.1)
 
 # Inflation Rate
-InflationRatePrediction = plt.plot(predInflationRate['Mean Predictions'],'m:', label = 'Predicted Inflation Rate')
+InflationRatePrediction = plt.plot(predInflationRate['Mean Predictions'].loc[plot_start_date:plot_end_date],'m:', label = 'Predicted Inflation Rate')
 
 plt.fill_between(predInflationRate.index, predInflationRate['Lower Bound'], predInflationRate['Upper Bound'], alpha = 0.1)
 
