@@ -174,16 +174,90 @@ pred_window_size +=2
 pred_end_date = str(time.loc[incident+pred_window_size])
 pred_end_date = pred_end_date[6:16]
 
-## next step concatonate new + old predictions
+# create new predictions
 predFederalFundsTargetRateNEW = model.predict('Federal Funds Target Rate',pred_start_date,pred_end_date)
 predEffectiveFederalFundsRateNEW = model.predict('Effective Federal Funds Rate',pred_start_date,pred_end_date)
 predRealGDPPercentChangeNEW = model.predict('Real GDP (Percent Change)', pred_start_date, pred_end_date)
 predUnemploymentRateNEW = model.predict('Unemployment Rate',pred_start_date,pred_end_date)
 predInflationRateNEW = model.predict('Inflation Rate', pred_start_date, pred_end_date)
 
+# concatonate new & old predictions
+predFederalFundsTargetRate = predFederalFundsTargetRate.append(predFederalFundsTargetRateNEW)
+predEffectiveFederalFundsRate = predEffectiveFederalFundsRate.append(predEffectiveFederalFundsRateNEW)
+predRealGDPPercentChange = predRealGDPPercentChange.append(predRealGDPPercentChangeNEW)
+predUnemploymentRate = predUnemploymentRate.append(predUnemploymentRateNEW)
+predInflationRate = predInflationRate.append(predInflationRateNEW)
 
 ## Re-examine the results & loop
 
+### Aggregating Data
+## Restructuring the predictions
+# Federal Funds Target Rate
+for i in range(0, 5):
+    print("loop: ",i)
+    newFFTR = pd.DataFrame({"Federal Funds Target Rate":predFederalFundsTargetRate[pred_start_date:pred_end_date]["Mean Predictions"]})
+    newFFTR = newFFTR.rename_axis(index="time")
+    tempNewFFTR = pd.DataFrame({"Federal Funds Target Rate":final_pred_data[:pred_start_date]["Federal Funds Target Rate"]})
+    tempNewFFTR = tempNewFFTR.append(newFFTR)
+
+    # Effective Federal Funds Rate
+    newEFFR = pd.DataFrame({"Effective Federal Funds Rate":predFederalFundsTargetRate[pred_start_date:pred_end_date]["Mean Predictions"]})
+    newEFFR  = newEFFR.rename_axis(index="time")
+    tempNewEFFR = pd.DataFrame({"Effective Federal Funds Rate":final_pred_data[:pred_start_date]["Effective Federal Funds Rate"]})
+    tempNewEFFR = tempNewEFFR.append(newEFFR)
+
+    # Real GDP (Percent Change)
+    newGDP = pd.DataFrame({"Real GDP (Percent Change)":predFederalFundsTargetRate[pred_start_date:pred_end_date]["Mean Predictions"]})
+    newGDP  = newGDP.rename_axis(index="time")
+    tempNewGDP = pd.DataFrame({"Real GDP (Percent Change)":final_pred_data[:pred_start_date]["Real GDP (Percent Change)"]})
+    tempNewGDP = tempNewGDP.append(newGDP)
+
+    # Unemployment Rate
+    newUR = pd.DataFrame({"Unemployment Rate":predFederalFundsTargetRate[pred_start_date:pred_end_date]["Mean Predictions"]})
+    newUR = newUR.rename_axis(index="time")
+    tempNewUR = pd.DataFrame({"Unemployment Rate":final_pred_data[:pred_start_date]["Unemployment Rate"]})
+    tempNewUR = tempNewUR.append(newUR)
+
+    # Inflation Rate
+    newIR = pd.DataFrame({"Inflation Rate":predFederalFundsTargetRate[pred_start_date:pred_end_date]["Mean Predictions"]})
+    newIR = newUR.rename_axis(index="time")
+    tempNewIR = pd.DataFrame({"Inflation Rate":final_pred_data[:pred_start_date]["Inflation Rate"]})
+    tempNewIR = tempNewIR.append(newUR)
+
+    ## Concatonate all the new predictions into a single dataframe
+    del final_pred_data
+    final_pred_data = pd.DataFrame({
+        "Federal Funds Target Rate":tempNewFFTR["Federal Funds Target Rate"],
+        "Effective Federal Funds Rate":tempNewEFFR["Effective Federal Funds Rate"],
+        "Real GDP (Percent Change)":tempNewGDP["Real GDP (Percent Change)"],
+        "Unemployment Rate":tempNewUR["Unemployment Rate"],
+        "Inflation Rate":tempNewIR["Inflation Rate"],
+        })
+    final_pred_data.drop_duplicates(keep='last')
+    model = mSSA()
+
+    model.update_model(final_pred_data)
+
+    pred_start_date = pred_end_date
+    pred_window_size +=2
+    pred_end_date = str(time.loc[incident+pred_window_size])
+    pred_end_date = pred_end_date[6:16]
+
+    # create new predictions
+    predFederalFundsTargetRateNEW = model.predict('Federal Funds Target Rate',pred_start_date,pred_end_date)
+    predEffectiveFederalFundsRateNEW = model.predict('Effective Federal Funds Rate',pred_start_date,pred_end_date)
+    predRealGDPPercentChangeNEW = model.predict('Real GDP (Percent Change)', pred_start_date, pred_end_date)
+    predUnemploymentRateNEW = model.predict('Unemployment Rate',pred_start_date,pred_end_date)
+    predInflationRateNEW = model.predict('Inflation Rate', pred_start_date, pred_end_date)
+
+    # concatonate new & old predictions
+    predFederalFundsTargetRate = predFederalFundsTargetRate.append(predFederalFundsTargetRateNEW)
+    predEffectiveFederalFundsRate = predEffectiveFederalFundsRate.append(predEffectiveFederalFundsRateNEW)
+    predRealGDPPercentChange = predRealGDPPercentChange.append(predRealGDPPercentChangeNEW)
+    predUnemploymentRate = predUnemploymentRate.append(predUnemploymentRateNEW)
+    predInflationRate = predInflationRate.append(predInflationRateNEW)
+
+### Plot
 plt.figure(figsize = (16, 6))
 
 ## Actual Values
