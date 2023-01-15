@@ -21,7 +21,7 @@ plot_start_date = '2007-09-17'
 plot_end_date = '2009-12-31'
 
 pred_start_date = '2007-09-17'
-pred_end_date = '2007-10-17'
+pred_end_date = '2009-12-31'
 
 ##### Federal Funds Target Rate
 
@@ -59,8 +59,10 @@ model.update_model(train_data)
 # Creating Predictions with the model
 
 predFederalFundsTargetRate = model.predict('Federal Funds Target Rate',pred_start_date,pred_end_date)
-
+predEffectiveFederalFundsRate = model.predict('Effective Federal Funds Rate',pred_start_date,pred_end_date)
+predRealGDPPercentChange = model.predict('Real GDP (Percent Change)', pred_start_date, pred_end_date)
 predUnemploymentRate = model.predict('Unemployment Rate',pred_start_date,pred_end_date)
+predInflationRate = model.predict('Inflation Rate', pred_start_date, pred_end_date)
 
 ### Creating a legend
 legend_list = data.columns.to_list()
@@ -73,15 +75,44 @@ plt.figure(figsize = (16, 6))
 
 ## Actual Values
 
-FederalFundsTargetRateActual = plt.plot(final_data['Federal Funds Target Rate'].loc[plot_start_date:plot_end_date], 'r', label = 'FederalFundsTargetRate Actual', alpha = 1.0)
+FederalFundsTargetRateActual = plt.plot(final_data['Federal Funds Target Rate'].loc[plot_start_date:plot_end_date], 'r', label = 'Historical Federal Funds Target Rate', alpha = 1.0)
 
-EffectiveFederalFundsRateActual = plt.plot(final_data['Effective Federal Funds Rate'].loc[plot_start_date:plot_end_date],'g', label = 'Effective Federal Funds Rate Actual', alpha = 1.0)
+EffectiveFederalFundsRateActual = plt.plot(final_data['Effective Federal Funds Rate'].loc[plot_start_date:plot_end_date],'g', label = 'Historical Effective Federal Funds Rate', alpha = 1.0)
 
-RealGDPPercentChangeActual = plt.plot(final_data['Real GDP (Percent Change)'].loc[plot_start_date:plot_end_date],'b', label = 'Real GDP (Percent Change) Actual', alpha = 1.0)
+RealGDPPercentChangeActual = plt.plot(final_data['Real GDP (Percent Change)'].loc[plot_start_date:plot_end_date],'b', label = 'Historical Real GDP (Percent Change)', alpha = 1.0)
 
-UnemploymentRateActual = plt.plot(final_data['Unemployment Rate'].loc[plot_start_date:plot_end_date],'y', label = 'Unemployment Rate Actual', alpha = 1.0)
+UnemploymentRateActual = plt.plot(final_data['Unemployment Rate'].loc[plot_start_date:plot_end_date],'c', label = 'Historical Unemployment Rate', alpha = 1.0)
 
-InflationRateActual = plt.plot(final_data['Inflation Rate'].loc[plot_start_date:plot_end_date],'orange', label = 'Inflation Rate Actual', alpha = 1.0)
+InflationRateActual = plt.plot(final_data['Inflation Rate'].loc[plot_start_date:plot_end_date],'m', label = 'Historical Inflation Rate', alpha = 1.0)
+
+## Predictions
+
+# Federal Funds Target Rate
+FederalFundsTargetRatePred = plt.plot(predFederalFundsTargetRate['Mean Predictions'], 'r:', label = 'Predicted Federal FundsTarget Rate')
+
+plt.fill_between(predFederalFundsTargetRate.index, predFederalFundsTargetRate['Lower Bound'], predFederalFundsTargetRate['Upper Bound'], alpha = 0.1)
+
+# Effective Federal Funds Rate
+EffectiveFederalFundsRatePrediction = plt.plot(predEffectiveFederalFundsRate['Mean Predictions'],'g:', label = 'Predicted Unemployment Rate')
+
+plt.fill_between(predEffectiveFederalFundsRate.index, predEffectiveFederalFundsRate['Lower Bound'], predEffectiveFederalFundsRate['Upper Bound'], alpha = 0.1)
+
+# Real GDP (Percent Change)
+RealGDPPercentChangePrediction = plt.plot(predRealGDPPercentChange['Mean Predictions'],'b:', label = 'Predicted Real GDP (Percent Change)')
+
+plt.fill_between(predRealGDPPercentChange.index, predRealGDPPercentChange['Lower Bound'], predRealGDPPercentChange['Upper Bound'], alpha = 0.1)
+
+# Unemployment Rate
+UnemploymentRatePrediction = plt.plot(predUnemploymentRate['Mean Predictions'],'c:', label = 'Predicted Unemployment Rate')
+
+plt.fill_between(predUnemploymentRate.index, predUnemploymentRate['Lower Bound'], predUnemploymentRate['Upper Bound'], alpha = 0.1)
+
+# Inflation Rate
+InflationRatePrediction = plt.plot(predInflationRate['Mean Predictions'],'m:', label = 'Predicted Inflation Rate')
+
+plt.fill_between(predInflationRate.index, predInflationRate['Lower Bound'], predInflationRate['Upper Bound'], alpha = 0.1)
+
+
 
 # Set the title of the plot 
 plt.title('What would have happened in 2009 if the Fed had raised rates instead of lowering them?')
