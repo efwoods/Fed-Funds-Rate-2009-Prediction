@@ -93,7 +93,7 @@ FederalFundsTargetRatePred = plt.plot(predFederalFundsTargetRate['Mean Predictio
 plt.fill_between(predFederalFundsTargetRate.index, predFederalFundsTargetRate['Lower Bound'], predFederalFundsTargetRate['Upper Bound'], alpha = 0.1)
 
 # Effective Federal Funds Rate
-EffectiveFederalFundsRatePrediction = plt.plot(predEffectiveFederalFundsRate['Mean Predictions'],'g:', label = 'Predicted Unemployment Rate')
+EffectiveFederalFundsRatePrediction = plt.plot(predEffectiveFederalFundsRate['Mean Predictions'],'g:', label = 'Predicted Effective Federal Funds Rate')
 
 plt.fill_between(predEffectiveFederalFundsRate.index, predEffectiveFederalFundsRate['Lower Bound'], predEffectiveFederalFundsRate['Upper Bound'], alpha = 0.1)
 
@@ -122,22 +122,6 @@ plt.title('What would have happened in 2009 if the Fed had raised rates instead 
 plt.legend(loc="lower right")
 
 plt.show()
-
-'''
-
-## Predictions
-
-# Federal Funds Target Rate
-FederalFundsTargetRatePred = plt.plot(predFederalFundsTargetRate['Mean Predictions'], 'g--', label = 'Federal FundsTarget Rate predictions')
-
-plt.fill_between(predFederalFundsTargetRate.index, predFederalFundsTargetRate['Lower Bound'], predFederalFundsTargetRate['Upper Bound'], alpha = 0.1)
-
-
-# Unemployment Rate
-UnemploymentRatePrediction = plt.plot(predUnemploymentRate['Mean Predictions'],'r--', label = 'UnemploymentRate predictions')
-
-plt.fill_between(predUnemploymentRate.index, predUnemploymentRate['Lower Bound'], predUnemploymentRate['Upper Bound'], alpha = 0.1)
-'''
 
 '''
 ### Forecast Monthly data
