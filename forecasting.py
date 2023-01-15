@@ -12,25 +12,16 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
-### Variables
-training_start_date ='1982-09-27'
-training_end_date ='2007-09-17'
-testing_start_date = '2007-09-17'
-
-plot_start_date = '2007-09-17'
-plot_end_date = '2009-12-31'
-
-pred_start_date = '2007-09-17'
-pred_end_date = '2009-12-31'
 
 ##### Federal Funds Target Rate
 
 ### format data
 data = pd.read_csv('./index.csv').fillna(method='ffill')
-data = data.fillna(0)
+data = data.ffill()
 
 # data_rm_lit = data.iloc[:,:4]
 # data_rmna = data_rm_lit.dropna()
+
 
 
 ymd = pd.DataFrame({'Year': data['Year'],'Month': data['Month'],'Day':data['Day']})
@@ -47,6 +38,23 @@ testdf = pd.DataFrame({
     })
 final_data =  pd.pivot_table(testdf,index=["time"])
 
+### Variables
+training_start_date ='1982-09-27'
+training_end_date ='2007-09-01'
+testing_start_date = '2007-09-01'
+
+plot_start_date = '2007-09-01'
+plot_end_date = '2009-12-31'
+
+
+pred_window_size = 2
+
+incident = time.loc[time =='2007-09-01'].index
+pred_start_date = str(time[incident])
+pred_start_date = pred_start_date[6:16]
+
+pred_end_date = str(time.loc[incident+pred_window_size])
+pred_end_date = pred_end_date[6:16]
 
 ### Training Model 
 
@@ -63,12 +71,6 @@ predEffectiveFederalFundsRate = model.predict('Effective Federal Funds Rate',pre
 predRealGDPPercentChange = model.predict('Real GDP (Percent Change)', pred_start_date, pred_end_date)
 predUnemploymentRate = model.predict('Unemployment Rate',pred_start_date,pred_end_date)
 predInflationRate = model.predict('Inflation Rate', pred_start_date, pred_end_date)
-
-### Creating a legend
-legend_list = data.columns.to_list()
-legend_list = legend_list[3:]
-legend_prediction = ['Federal Funds Target Rate Prediction', 'Federal Funds Upper Target Prediction', 'Federal Funds Lower Target Prediction', 'Effective Federal Funds Rate Prediction', 'Real GDP (Percent Change) Prediction', 'Unemployment Rate Prediction', 'Inflation Rate Prediction']
-
 
 ### Plotting
 plt.figure(figsize = (16, 6))
@@ -171,3 +173,39 @@ for day in range(days):
     # Update start_time
     start_time = start_time + pd.Timedelta(hours = 24)
 '''
+
+
+### Aggregating Data
+## Restructuring the prediction
+effRate = pd.DataFrame({"Effective Federal Funds Rate":predFederalFundsTargetRate[pred_start_date:pred_end_date]["Mean Predictions"]})
+effRate = effRate.rename_axis(index="time")
+tempFinalPred = pd.DataFrame({"Effective Federal Funds Rate":final_data[:pred_start_date]["Effective Federal Funds Rate"]})
+
+tempFinalPred = tempFinalPred.append(effRate)
+pred_start_date = pred_end_date
+
+## Concatonate all the new predictions into a single dataframe
+# pd.DataFrame({"Effective Federal Funds Rate1":tempFinalPred["Effective Federal Funds Rate"],"Effective Federal Funds Rate2":tempFinalPred["Effective Federal Funds Rate"]})
+
+'''
+### Adding Months
+
+# import packages
+import numpy as np
+  
+# adding months to a given date
+print('old date is : ' + str(np.datetime64('2022-04')))
+new_date = np.datetime64('2022-04') + np.timedelta64(5, 'M')
+print('new date is : '+str(new_date))
+'''
+
+#'2007-09-01' == time index 776
+#incident = time.loc[time =='2007-09-01'].index
+# to iterate through the time: incident +1 -> n
+
+effRate = pd.DataFrame({"Effective Federal Funds Rate":predFederalFundsTargetRate[time[]:pred_end_date]["Mean Predictions"]})
+
+### Converting the datetime into a string to address the prediction
+# dateString = str(time[incident])
+# dateString = dateString[6:16]
+# predFederalFundsTargetRate[dateString]
