@@ -115,7 +115,6 @@ InflationRatePrediction = plt.plot(predInflationRate['Mean Predictions'],'m:', l
 plt.fill_between(predInflationRate.index, predInflationRate['Lower Bound'], predInflationRate['Upper Bound'], alpha = 0.1)
 
 
-
 # Set the title of the plot 
 plt.title('What would have happened in 2009 if the Fed had raised rates instead of lowering them?')
 
@@ -124,55 +123,6 @@ plt.title('What would have happened in 2009 if the Fed had raised rates instead 
 plt.legend(loc="lower right")
 
 plt.show()
-
-'''
-### Forecast Monthly data
-# Initialize prediction array
-predictions = np.zeros((len(test_data.columns), 24*7))
-
-upper_bound = np.zeros((len(test_data.columns), 24*7))
-
-lower_bound = np.zeros((len(test_data.columns), 24*7))
-
-actual = test_data.values[ :24 * 7, : ]
-
-# Specify start time
-start_time = pd.Timestamp('2014-12-19 01:00:00')
-
-# Predict for seven days
-days = 7
-
-for day in range(days):
-    
-    # Get the final timestamp in the day
-    end_time = start_time + pd.Timedelta(hours = 23)
-    
-    # Convert timestamps to string
-    start_str = start_time.strftime('%Y-%m-%d %H:%M:%S')
-    
-    end_str = end_time.strftime('%Y-%m-%d %H:%M:%S')
-    
-    # Predict for each house
-    for i, column in enumerate(test_data.columns):
-        
-        # Let us create the forecast
-        df_30 = UnemploymentRateModel.predict(column, start_str, end_str)
-        
-        predictions[i, day * 24 : (day + 1) * 24] = df_30['Mean Predictions']
-        
-        upper_bound[i, day * 24 : (day + 1) * 24] = df_30['Upper Bound']
-        
-        lower_bound[i, day * 24 : (day + 1) * 24] = df_30['Lower Bound']
-    
-    # Fit the model with the already predicted values 
-    df_insert = test_data.iloc[day * 24 : 24 * (day + 1), : ]
-    
-    # Update the model
-    UnemploymentRateModel.update_model(df_insert)
-    
-    # Update start_time
-    start_time = start_time + pd.Timedelta(hours = 24)
-'''
 
 
 ### Aggregating Data
@@ -207,8 +157,6 @@ newIR = newUR.rename_axis(index="time")
 tempNewIR = pd.DataFrame({"Inflation Rate":final_data[:pred_start_date]["Inflation Rate"]})
 tempNewIR = tempNewIR.append(newUR)
 
-
-
 ## Concatonate all the new predictions into a single dataframe
 final_pred_data = pd.DataFrame({
     "Federal Funds Target Rate":tempNewFFTR["Federal Funds Target Rate"],
@@ -217,24 +165,68 @@ final_pred_data = pd.DataFrame({
     "Unemployment Rate":tempNewUR["Unemployment Rate"],
     "Inflation Rate":tempNewIR["Inflation Rate"],
     })
+model = mSSA()
+
 model.update_model(final_pred_data)
 
-predFederalFundsTargetRate = model.predict('Federal Funds Target Rate',pred_start_date,pred_end_date)
-predEffectiveFederalFundsRate = model.predict('Effective Federal Funds Rate',pred_start_date,pred_end_date)
-predRealGDPPercentChange = model.predict('Real GDP (Percent Change)', pred_start_date, pred_end_date)
-predUnemploymentRate = model.predict('Unemployment Rate',pred_start_date,pred_end_date)
-predInflationRate = model.predict('Inflation Rate', pred_start_date, pred_end_date)
+pred_start_date = pred_end_date
+pred_window_size +=2
+pred_end_date = str(time.loc[incident+pred_window_size])
+pred_end_date = pred_end_date[6:16]
 
-## Concatonate all the new predictions into a single dataframe
-# pd.DataFrame({"Effective Federal Funds Rate1":tempNewFFTR["Effective Federal Funds Rate"],"Effective Federal Funds Rate2":tempFinalPred["Effective Federal Funds Rate"]})
+## next step concatonate new + old predictions
+predFederalFundsTargetRateNEW = model.predict('Federal Funds Target Rate',pred_start_date,pred_end_date)
+predEffectiveFederalFundsRateNEW = model.predict('Effective Federal Funds Rate',pred_start_date,pred_end_date)
+predRealGDPPercentChangeNEW = model.predict('Real GDP (Percent Change)', pred_start_date, pred_end_date)
+predUnemploymentRateNEW = model.predict('Unemployment Rate',pred_start_date,pred_end_date)
+predInflationRateNEW = model.predict('Inflation Rate', pred_start_date, pred_end_date)
 
-#'2007-09-01' == time index 776
-#incident = time.loc[time =='2007-09-01'].index
-# to iterate through the time: incident +1 -> n
 
-effRate = pd.DataFrame({"Effective Federal Funds Rate":predFederalFundsTargetRate[time[]:pred_end_date]["Mean Predictions"]})
+## Re-examine the results & loop
 
-### Converting the datetime into a string to address the prediction
-# dateString = str(time[incident])
-# dateString = dateString[6:16]
-# predFederalFundsTargetRate[dateString]
+plt.figure(figsize = (16, 6))
+
+## Actual Values
+
+FederalFundsTargetRateActual = plt.plot(final_data['Federal Funds Target Rate'].loc[plot_start_date:plot_end_date], 'r', label = 'Historical Federal Funds Target Rate', alpha = 1.0)
+
+EffectiveFederalFundsRateActual = plt.plot(final_data['Effective Federal Funds Rate'].loc[plot_start_date:plot_end_date],'g', label = 'Historical Effective Federal Funds Rate', alpha = 1.0)
+
+RealGDPPercentChangeActual = plt.plot(final_data['Real GDP (Percent Change)'].loc[plot_start_date:plot_end_date],'b', label = 'Historical Real GDP (Percent Change)', alpha = 1.0)
+
+UnemploymentRateActual = plt.plot(final_data['Unemployment Rate'].loc[plot_start_date:plot_end_date],'c', label = 'Historical Unemployment Rate', alpha = 1.0)
+
+InflationRateActual = plt.plot(final_data['Inflation Rate'].loc[plot_start_date:plot_end_date],'m', label = 'Historical Inflation Rate', alpha = 1.0)
+
+
+# Federal Funds Target Rate
+FederalFundsTargetRatePred = plt.plot(predFederalFundsTargetRate['Mean Predictions'], 'r:', label = 'Predicted Federal FundsTarget Rate')
+
+plt.fill_between(predFederalFundsTargetRate.index, predFederalFundsTargetRate['Lower Bound'], predFederalFundsTargetRate['Upper Bound'], alpha = 0.1)
+
+# Effective Federal Funds Rate
+EffectiveFederalFundsRatePrediction = plt.plot(predEffectiveFederalFundsRate['Mean Predictions'],'g:', label = 'Predicted Effective Federal Funds Rate')
+
+plt.fill_between(predEffectiveFederalFundsRate.index, predEffectiveFederalFundsRate['Lower Bound'], predEffectiveFederalFundsRate['Upper Bound'], alpha = 0.1)
+
+# Real GDP (Percent Change)
+RealGDPPercentChangePrediction = plt.plot(predRealGDPPercentChange['Mean Predictions'],'b:', label = 'Predicted Real GDP (Percent Change)')
+
+plt.fill_between(predRealGDPPercentChange.index, predRealGDPPercentChange['Lower Bound'], predRealGDPPercentChange['Upper Bound'], alpha = 0.1)
+
+# Unemployment Rate
+UnemploymentRatePrediction = plt.plot(predUnemploymentRate['Mean Predictions'],'c:', label = 'Predicted Unemployment Rate')
+
+plt.fill_between(predUnemploymentRate.index, predUnemploymentRate['Lower Bound'], predUnemploymentRate['Upper Bound'], alpha = 0.1)
+
+# Inflation Rate
+InflationRatePrediction = plt.plot(predInflationRate['Mean Predictions'],'m:', label = 'Predicted Inflation Rate')
+
+plt.fill_between(predInflationRate.index, predInflationRate['Lower Bound'], predInflationRate['Upper Bound'], alpha = 0.1)
+
+# Set the title of the plot 
+plt.title('What would have happened in 2009 if the Fed had raised rates instead of lowering them?')
+
+plt.legend(loc="lower right")
+
+plt.show()
