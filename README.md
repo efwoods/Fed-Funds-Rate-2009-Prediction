@@ -9,3 +9,6 @@ September 18, 2007: The Federal Open Market Committee began reducing the federal
 [Using data to extend historical trends with respect to the Federal Funds Target Rate, Effective Federal Funds Rate, Real GDP (Percent Change), Unemployment Rate, & Inflation Rate, there may have been effects as observed here:](https://twitter.com/evanwoods/status/1614759349917986816?s=61&t=cNmKEt-9ES584ZYlbbVbwA)
 
 ![2009_Federal_Funds_Rate](./2009_Federal_Funds_Rate.png)
+
+## Notes
+The data is extended by 48 months using mSSA from the incident of September 18, 2007. For future improvements and increased precision, I anticipate implementing a rolling average with a monthly or bi-monthly sliding window.
