@@ -84,7 +84,7 @@ UnemploymentRateActual = plt.plot(final_data['Unemployment Rate'].loc[plot_start
 InflationRateActual = plt.plot(final_data['Inflation Rate'].loc[plot_start_date:plot_end_date],'orange', label = 'Inflation Rate Actual', alpha = 1.0)
 
 # Set the title of the plot 
-plt.title('Forecasting Federal Funds Target Rate 1 month ahead')
+plt.title('What would have happened in 2009 if the Fed had raised rates instead of lowering them?')
 
 # Set legend
 # plt.axis([FederalFundsTargetRatePred,FederalFundsTargetRateActual, UnemploymentRatePrediction, UnemploymentRateActual], label='Inline label')
