@@ -1,3 +1,17 @@
+# Installing the mSSA library
+from mssa.mssa import mSSA
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+# An advanced library for data visualization in python
+import seaborn as sns
+
+# A simple library for data visualization in python
+import matplotlib.pyplot as plt
+
+# To ignore warnings in the code
+import warnings
+warnings.filterwarnings('ignore')
+
 ### Variables
 training_start_date ='1982-09-27'
 training_end_date ='2007-09-17'
@@ -7,122 +21,80 @@ plot_start_date = '2007-09-17'
 plot_end_date = '2009-12-31'
 
 pred_start_date = '2007-09-17'
-pred_end_date = '2008-10-17'
+pred_end_date = '2007-10-17'
 
 ##### Federal Funds Target Rate
 
 ### format data
 data = pd.read_csv('./index.csv').fillna(method='ffill')
+data = data.fillna(0)
+
 # data_rm_lit = data.iloc[:,:4]
 # data_rmna = data_rm_lit.dropna()
-data_rmna = data
-ymd = pd.DataFrame({'Year': data_rmna['Year'],'Month': data_rmna['Month'],'Day':data_rmna['Day']})
+
+
+ymd = pd.DataFrame({'Year': data['Year'],'Month': data['Month'],'Day':data['Day']})
 time = pd.to_datetime(ymd)
-testdf = pd.DataFrame({'time':time, 'Federal Funds Target Rate': data_rmna['Federal Funds Target Rate']})
+testdf = pd.DataFrame({
+    'time':time,
+    'Federal Funds Target Rate': data['Federal Funds Target Rate'],
+    'Federal Funds Upper Target': data['Federal Funds Upper Target'],
+    'Federal Funds Lower Target': data['Federal Funds Lower Target'],
+    'Effective Federal Funds Rate': data['Effective Federal Funds Rate'],
+    'Real GDP (Percent Change)': data['Real GDP (Percent Change)'],
+    'Unemployment Rate': data['Unemployment Rate'],
+    'Inflation Rate': data['Inflation Rate'],
+    })
 final_data =  pd.pivot_table(testdf,index=["time"])
+
 
 ### Training Model 
 
 train_data = final_data.loc[training_start_date:training_end_date]
 test_data = final_data.loc[testing_start_date:]
 
-FFTRmodel = mSSA(rank=1)
-FFTRmodel.update_model(train_data)
-pred = FFTRmodel.predict('Federal Funds Target Rate',pred_start_date,pred_end_date)
+model = mSSA(rank=1)
+model.update_model(train_data)
+
+# Creating Predictions with the model
+
+predFederalFundsTargetRate = model.predict('Federal Funds Target Rate',pred_start_date,pred_end_date)
+
+predUnemploymentRate = model.predict('Unemployment Rate',pred_start_date,pred_end_date)
+
+### Creating a legend
+legend_list = data.columns.to_list()
+legend_list = legend_list[3:]
+legend_prediction = ['Federal Funds Target Rate Prediction', 'Federal Funds Upper Target Prediction', 'Federal Funds Lower Target Prediction', 'Effective Federal Funds Rate Prediction', 'Real GDP (Percent Change) Prediction', 'Unemployment Rate Prediction', 'Inflation Rate Prediction']
+
 
 ### Plotting
 plt.figure(figsize = (16, 6))
 
-plt.plot(pred['Mean Predictions'], label = 'predictions')
+# Federal Funds Target Rate
+FederalFundsTargetRatePred = plt.plot(predFederalFundsTargetRate['Mean Predictions'], label = 'FederalFundsTargetRate predictions')
 
-plt.fill_between(pred.index, pred['Lower Bound'], pred['Upper Bound'], alpha = 0.1)
+plt.fill_between(predFederalFundsTargetRate.index, predFederalFundsTargetRate['Lower Bound'], predFederalFundsTargetRate['Upper Bound'], alpha = 0.1)
 
-plt.plot(final_data['Federal Funds Target Rate'].loc[plot_start_date:plot_end_date], label = 'Actual', alpha = 1.0)
+FederalFundsTargetRateActual = plt.plot(final_data['Federal Funds Target Rate'].loc[plot_start_date:plot_end_date], label = 'FederalFundsTargetRate Actual', alpha = 1.0)
+
+# Unemployment Rate
+UnemploymentRatePrediction = plt.plot(predUnemploymentRate['Mean Predictions'], label = 'UnemploymentRate predictions')
+
+plt.fill_between(predUnemploymentRate.index, predUnemploymentRate['Lower Bound'], predUnemploymentRate['Upper Bound'], alpha = 0.1)
+
+UnemploymentRateActual = plt.plot(final_data['Unemployment Rate'].loc[plot_start_date:plot_end_date], label = 'UnemploymentRate Actual', alpha = 1.0)
+
+
 
 # Set the title of the plot 
-plt.title('Forecasting 1 day ahead')
+plt.title('Forecasting Federal Funds Target Rate 1 month ahead')
 
+# Set legend
+plt.axis([FederalFundsTargetRatePred,FederalFundsTargetRateActual, UnemploymentRatePrediction, UnemploymentRateActual], label='Inline label')
 plt.legend()
 
 plt.show()
-
-
-##### Unemployment Rate
-
-### format data
-data = pd.read_csv('./index.csv').fillna(method='ffill')
-# data_rm_lit = data.iloc[:,:4]
-# data_rmna = data_rm_lit.dropna()
-data_rmna = data
-ymd = pd.DataFrame({'Year': data_rmna['Year'],'Month': data_rmna['Month'],'Day':data_rmna['Day']})
-time = pd.to_datetime(ymd)
-testdf = pd.DataFrame({'time':time, 'Unemployment Rate': data_rmna['Unemployment Rate']})
-final_data =  pd.pivot_table(testdf,index=["time"])
-
-### Training Model 
-
-train_data = final_data.loc[training_start_date:training_end_date]
-test_data = final_data.loc[testing_start_date:]
-
-UnemploymentRateModel = mSSA(rank=1)
-UnemploymentRateModel.update_model(train_data)
-pred = UnemploymentRateModel.predict('Unemployment Rate',pred_start_date,pred_end_date)
-
-### Plotting
-plt.figure(figsize = (16, 6))
-
-plt.plot(pred['Mean Predictions'], label = 'predictions')
-
-plt.fill_between(pred.index, pred['Lower Bound'], pred['Upper Bound'], alpha = 0.1)
-
-plt.plot(final_data['Unemployment Rate'].loc[plot_start_date:plot_end_date], label = 'Actual', alpha = 1.0)
-
-# Set the title of the plot 
-plt.title('Forecasting Unemployment Rate 1 Month ahead')
-
-plt.legend()
-
-plt.show()
-
-
-##### Effective Federal Funds Rate
-
-### format data
-data = pd.read_csv('./index.csv').fillna(method='ffill')
-# data_rm_lit = data.iloc[:,:4]
-# data_rmna = data_rm_lit.dropna()
-
-data_rmna = data
-ymd = pd.DataFrame({'Year': data_rmna['Year'],'Month': data_rmna['Month'],'Day':data_rmna['Day']})
-time = pd.to_datetime(ymd)
-testdf = pd.DataFrame({'time':time, 'Effective Federal Funds Rate': data_rmna['Effective Federal Funds Rate']})
-final_data =  pd.pivot_table(testdf,index=["time"])
-
-### Training Model 
-
-train_data = final_data.loc[training_start_date:training_end_date]
-test_data = final_data.loc[testing_start_date:]
-
-EffectiveFederalFundsRateModel = mSSA(rank=1)
-EffectiveFederalFundsRateModel.update_model(train_data)
-pred = EffectiveFederalFundsRateModel.predict('Effective Federal Funds Rate',pred_start_date,pred_end_date)
-
-### Plotting
-plt.figure(figsize = (16, 6))
-
-plt.plot(pred['Mean Predictions'], label = 'predictions')
-
-plt.fill_between(pred.index, pred['Lower Bound'], pred['Upper Bound'], alpha = 0.1)
-
-plt.plot(final_data['Effective Federal Funds Rate'].loc[plot_start_date:plot_end_date], label = 'Actual', alpha = 1.0)
-
-# Set the title of the plot 
-plt.title('Forecasting Effective Federal Funds Rate Rate 1 Month ahead')
-
-plt.legend()
-
-plt.show()
-
 
 '''
 ### Forecast Monthly data
