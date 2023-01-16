@@ -44,7 +44,7 @@ plot_start_date = '2007-09-01'
 plot_end_date = '2009-12-31'
 
 
-pred_window_size = 48
+pred_window_size = 36
 
 incident = time.loc[time =='2007-09-01'].index
 pred_start_date = str(time[incident])
